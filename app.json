@@ -4,7 +4,7 @@
     "slug": "mi-drum",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/icon-1024.png",
     "scheme": "midrum",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,12 +14,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "icon": "./assets/icons/icon-1024.png",
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icons/android-adaptive-foreground-432.png",
+        "backgroundColor": "#FF9500"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

@@ -1,1 +1,2 @@
-export { useColorScheme } from 'react-native';
+export * from './hooks/useColorScheme';
+
