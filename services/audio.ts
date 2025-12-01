@@ -23,7 +23,6 @@ class AudioEngine {
         try {
             await s.replayAsync();
         } catch (e) {
-            // manejar errores de reproducción (log por ahora)
             console.warn('AudioEngine.play error', e);
         }
     }

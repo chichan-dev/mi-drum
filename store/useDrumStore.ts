@@ -1,3 +1,4 @@
+import type { DrumState, Pad } from '@/types';
 import * as zustand from 'zustand';
 
 // Resolve the `create` factory in a robust way at runtime.
@@ -44,21 +45,7 @@ if (typeof create !== 'function') {
 // Cast to a generic-accepting signature so TypeScript accepts create<State>(...)
 const createTyped = (create as unknown) as (<T>(f: any) => any);
 
-export type Pad = {
-    id: string;
-    label?: string;
-    soundUri?: any; // puede ser un require(...) (número local) o una URL
-    volume?: number;
-    color?: string;
-};
-
-type DrumState = {
-    pads: Pad[];
-    addPad: (pad: Pad) => void;
-    updatePad: (id: string, data: Partial<Pad>) => void;
-    removePad: (id: string) => void;
-    setPads: (pads: Pad[]) => void;
-};
+// types `Pad` and `DrumState` are defined centrally in `types/pads.ts` and imported above.
 type SetState = (partial: Partial<DrumState> | ((state: DrumState) => Partial<DrumState>)) => void;
 
 export const useDrumStore = createTyped<DrumState>((set: SetState) => ({
@@ -69,3 +56,10 @@ export const useDrumStore = createTyped<DrumState>((set: SetState) => ({
     removePad: (id: string) => set((s: DrumState) => ({ pads: s.pads.filter((p: Pad) => p.id !== id) })),
     setPads: (pads: Pad[]) => set(() => ({ pads })),
 }));
+
+// Re-export Pad type for compatibility with existing imports
+export type { Pad } from '@/types';
+
+// Export the hook return type for convenience
+export type UseDrumStore = ReturnType<typeof useDrumStore>;
+
