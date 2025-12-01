@@ -5,111 +5,25 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import DrumPad from "@/components/DrumPad";
-import { Text, View } from "@/components/Themed";
-import { useAudio } from "../../src/hooks/useAudio";
-import audioEngine from "../../src/services/audio";
-import { Pad, useDrumStore } from "../../src/store/useDrumStore";
-
-const DEFAULT_PADS: Pad[] = [
-  {
-    id: "kick",
-    label: "Kick",
-    soundUri: require("../../assets/sounds/kick.wav"),
-    color: "#ff6b6b",
-  },
-  {
-    id: "snare",
-    label: "Snare",
-    soundUri: require("../../assets/sounds/snare.wav"),
-    color: "#4d96ff",
-  },
-  {
-    id: "hihat_closed",
-    label: "Hi-Hat (Closed)",
-    soundUri: require("../../assets/sounds/hihat_closed.wav"),
-    color: "#ffd166",
-  },
-  {
-    id: "hihat_open",
-    label: "Hi-Hat (Open)",
-    soundUri: require("../../assets/sounds/hihat_open.wav"),
-    color: "#ffd166",
-  },
-  {
-    id: "tom_high",
-    label: "Tom High",
-    soundUri: require("../../assets/sounds/tom_high.wav"),
-    color: "#06d6a0",
-  },
-  {
-    id: "tom_mid",
-    label: "Tom Mid",
-    soundUri: require("../../assets/sounds/tom_mid.wav"),
-    color: "#06d6a0",
-  },
-  {
-    id: "tom_low",
-    label: "Tom Low",
-    soundUri: require("../../assets/sounds/tom_low.wav"),
-    color: "#ffd166",
-  },
-  {
-    id: "clap",
-    label: "Clap",
-    soundUri: require("../../assets/sounds/clap.wav"),
-    color: "#a66cff",
-  },
-  {
-    id: "rimshot",
-    label: "Rimshot",
-    soundUri: require("../../assets/sounds/rimshot.wav"),
-    color: "#ff9f1c",
-  },
-  {
-    id: "cowbell",
-    label: "Cowbell",
-    soundUri: require("../../assets/sounds/cowbell.wav"),
-    color: "#f15bb5",
-  },
-  {
-    id: "ride_bell",
-    label: "Ride Bell",
-    soundUri: require("../../assets/sounds/ride_bell.wav"),
-    color: "#2ec4b6",
-  },
-  {
-    id: "crash",
-    label: "Crash",
-    soundUri: require("../../assets/sounds/crash.wav"),
-    color: "#2ec4b6",
-  },
-  {
-    id: "shaker",
-    label: "Shaker",
-    soundUri: require("../../assets/sounds/shaker.wav"),
-    color: "#00b4d8",
-  },
-  {
-    id: "bongo",
-    label: "Bongo",
-    soundUri: require("../../assets/sounds/bongo.wav"),
-    color: "#ffb4a2",
-  },
-  {
-    id: "clave",
-    label: "Clave",
-    soundUri: require("../../assets/sounds/clave.wav"),
-    color: "#8ac926",
-  },
-];
+import { Text } from "@/components/Themed";
+import { useAudio } from "@/hooks/useAudio";
+import audioEngine from "@/services/audio";
+import DEFAULT_PADS from "@/store/defaultPads";
+import { useDrumStore } from "@/store/useDrumStore";
+import type { DrumState } from "@/types";
 
 export default function TabOneScreen() {
-  useAudio(); // set up audio lifecycle (unload on unmount)
+  useAudio();
+  const insets = useSafeAreaInsets();
 
-  const setPads = useDrumStore((s: any) => s.setPads);
-  const pads = useDrumStore((s: any) => s.pads);
+  const setPads = useDrumStore((s: DrumState) => s.setPads);
+  const pads = useDrumStore((s: DrumState) => s.pads);
   const [loadingSounds, setLoadingSounds] = useState(true);
   const [loadedCount, setLoadedCount] = useState(0);
   const totalPads = DEFAULT_PADS.length;
@@ -165,8 +79,7 @@ export default function TabOneScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mi Drum — By Chichan-Dev</Text>
+    <SafeAreaView style={styles.container}>
       <RNView style={styles.grid}>
         {loadingSounds && (
           <RNView style={styles.loadingWrap}>
@@ -184,13 +97,16 @@ export default function TabOneScreen() {
           </RNView>
         )}
         <FlatList
-          key={columns} // force re-layout when columns change
+          key={columns}
           data={pads.length ? pads : DEFAULT_PADS}
           keyExtractor={(item) => item.id}
           numColumns={columns}
           showsVerticalScrollIndicator={false}
           columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.gridContent}
+          contentContainerStyle={[
+            styles.gridContent,
+            { paddingBottom: Math.max(16, insets.bottom + 16) },
+          ]}
           renderItem={({ item }) => (
             <DrumPad
               id={item.id}
@@ -203,14 +119,14 @@ export default function TabOneScreen() {
           )}
         />
       </RNView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    marginHorizontal: 5,
   },
   title: {
     fontSize: 20,
