@@ -1,3 +1,4 @@
+import * as ScreenOrientation from "expo-screen-orientation";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -36,6 +37,12 @@ export default function TabOneScreen() {
   // gap between columns: items have horizontal margin of 6 each, so gap approx 12 per column gap
   const gap = 12 * (columns - 1);
   const padSize = Math.floor((windowWidth - horizontalPadding - gap) / columns);
+
+  useEffect(() => {
+    ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT
+    ).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     // set default pads once
@@ -79,7 +86,7 @@ export default function TabOneScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <RNView style={styles.grid}>
         {loadingSounds && (
           <RNView style={styles.loadingWrap}>
@@ -103,9 +110,10 @@ export default function TabOneScreen() {
           numColumns={columns}
           showsVerticalScrollIndicator={false}
           columnWrapperStyle={styles.columnWrapper}
+          contentInsetAdjustmentBehavior="never"
           contentContainerStyle={[
             styles.gridContent,
-            { paddingBottom: Math.max(16, insets.bottom + 16) },
+            { paddingBottom: insets.bottom + 16 },
           ]}
           renderItem={({ item }) => (
             <DrumPad

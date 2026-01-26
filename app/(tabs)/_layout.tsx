@@ -2,7 +2,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import React from "react";
 
-import { GridIcon, SettingsIcon } from "@/components/icons";
+import { DeckIcon, GridIcon, SettingsIcon } from "@/components/icons";
 import Colors from "@/constants/Colors";
 import { useClientOnlyValue } from "@/hooks/useClientOnlyValue";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -34,6 +34,21 @@ export default function TabLayout() {
               height={size}
               fill={color}
               accessibilityLabel="Pads"
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="DJ"
+        options={{
+          title: "DJ",
+          tabBarIcon: ({ color, size }) => (
+            <DeckIcon
+              width={size}
+              height={size}
+              fill={color}
+              accessibilityLabel="Modo DJ"
             />
           ),
         }}
