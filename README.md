@@ -1,6 +1,6 @@
-# 🥁 Drum App (Expo) — by **chichan‑dev**
+# 🥁 Chichan DJ & Drum App (Expo)
 
-¡Bienvenido! Este repositorio contiene una app **Drum Pads** construida con **React Native + Expo**. El objetivo es ofrecer una base limpia para disparar samples, personalizar bancos de sonidos y practicar ritmos desde el móvil o emulador.
+¡Bienvenido! Esta app combina **Drum Pads** con una **consola DJ completa** construida con **React Native + Expo**. Incluye autenticación OAuth con Google, integración con YouTube Music, y control de decks de DJ profesional.
 
 > **Marca**: parte del ecosistema **chichan‑dev** · Repos/paquetes bajo el paraguas de *chichan‑labs*.
 
@@ -8,14 +8,98 @@
 
 ## ✨ Características
 
-* Pads táctiles con baja latencia (según dispositivo).
-* Carga de **samples** locales desde `assets/`.
-* Mapeo de pads configurable (nombre, color, sonido, volumen, **pitch/gain** si aplica).
-* Indicador visual al presionar.
-* Modo **Hold** / **One‑Shot** (dependiendo de implementación de audio).
-* Soporte Expo (sin configuración nativa compleja para empezar).
+### Drum Pads
+* Pads táctiles con baja latencia (según dispositivo)
+* Carga de **samples** locales desde `assets/`
+* Mapeo de pads configurable (nombre, color, sonido, volumen, **pitch/gain**)
+* Indicador visual al presionar
+* Modo **Hold** / **One‑Shot**
 
-> **Nota:** El rendimiento y la latencia dependen del hardware y del motor de audio seleccionado. Ver sección [Audio Engine](#-audio-engine) para opciones.
+### DJ Console
+* 🎚️ **Doble deck de vinilo** con controles táctiles
+* 🎵 **Waveforms** visuales en tiempo real
+* 🔀 **Crossfader** suave entre decks
+* 🎛️ **Controles verticales** de volumen por deck
+* ▶️ **Play, Cue, Sync** buttons profesionales
+* 🔍 **Búsqueda de música** en YouTube
+* 📱 **Integración con YouTube**: canal, playlists, me gusta
+* 🔐 **Autenticación OAuth con Google**
+* 💾 **Persistencia segura** de sesión con Zustand + SecureStore
+
+### Sistema de Autenticación
+* Login con cuenta de Google
+* Token JWT para todas las peticiones
+* Almacenamiento encriptado del token
+* Persistencia de sesión entre reinicios
+* **[Ver documentación completa](AUTH_README.md)**
+
+---
+
+## 🚀 Inicio Rápido
+
+### 1. Instalación
+```bash
+npm install
+# o
+npx expo install
+```
+
+### 2. Configurar Backend (para funciones DJ)
+Sigue la guía en **[AUTH_README.md](AUTH_README.md)** para:
+- Configurar Google OAuth
+- Iniciar el backend de ejemplo
+- Obtener tus credenciales de API
+
+### 3. Iniciar la App
+```bash
+# Con variables de entorno para conectar al backend
+EXPO_PUBLIC_API_BASE_URL="http://192.168.80.26:2600" \
+EXPO_PUBLIC_AUTH_URL="http://192.168.80.26:2600/auth/google" \
+expo start
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+app/
+  (tabs)/
+    index.tsx           # Pantalla de Drum Pads
+    DJ.tsx              # Consola DJ con autenticación
+    Settings.tsx        # Configuración
+store/
+  useAuthStore.ts       # State management de autenticación
+  useDrumStore.ts       # State de drum pads
+hooks/
+  useGoogleAuth.ts      # Hook de OAuth con Google
+  useDeckPlayer.ts      # Control de decks de DJ
+  useAudio.ts           # Audio engine
+components/ui/
+  LoginScreen.tsx       # Pantalla de login
+  VinylDeck.tsx         # Deck de vinilo visual
+  Crossfader.tsx        # Crossfader entre decks
+  Waveform.tsx          # Visualización de waveform
+  VerticalSlider.tsx    # Control de volumen vertical
+services/
+  api.ts                # Cliente HTTP con autenticación
+  audio.ts              # Motor de audio
+```
+
+---
+
+## 🔐 Autenticación
+
+El sistema de autenticación permite:
+- Login con Google OAuth
+- Acceso a tu canal de YouTube, playlists y me gusta
+- Búsqueda de música
+- Token JWT persistente y seguro
+
+**Documentación completa:**
+- **[AUTH_README.md](AUTH_README.md)** - Guía rápida
+- **[OAUTH_SETUP.md](OAUTH_SETUP.md)** - Setup detallado del backend
+- **[backend-example.js](backend-example.js)** - Código de servidor completo
 
 ---
 
