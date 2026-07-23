@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Animated,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -56,38 +55,60 @@ export default function DrumPad({
         style={[
           styles.pad,
           {
-            backgroundColor: color,
+            borderColor: color || "#ff2a3b",
+            shadowColor: color || "#ff2a3b",
             opacity: isLoading ? 0.65 : 1,
             transform: [{ scale }],
           },
           style,
-          Platform.OS === "ios" ? styles.iosShadow : styles.androidShadow,
         ]}
       >
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.label}>
-          {label ?? id}
-        </Text>
-        {isLoading ? <Text style={styles.loadingSmall}>⏳</Text> : null}
+        {/* Fondo interior con acabado de metal oscuro */}
+        <Animated.View style={[styles.innerSurface, { backgroundColor: color + "22" }]}>
+          <Text numberOfLines={1} ellipsizeMode="tail" style={[styles.label, { color: "#ffffff" }]}>
+            {label ?? id}
+          </Text>
+          {isLoading ? <Text style={styles.loadingSmall}>⏳</Text> : null}
+        </Animated.View>
       </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  // no fixed width/height here so parent can control sizing responsively
   pad: {
+    borderRadius: 12,
+    alignItems: "stretch",
+    justifyContent: "center",
+    margin: 6,
+    padding: 3,
+    backgroundColor: "#120d0d",
+    borderWidth: 2.5,
+    shadowOpacity: 0.6,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  innerSurface: {
+    flex: 1,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    margin: 6,
-    padding: 2,
+    backgroundColor: "#181011",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.9,
   },
   label: {
-    color: "#fff",
-    fontWeight: "700",
+    color: "#ffffff",
+    fontWeight: "900",
+    fontSize: 14,
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   loadingSmall: {
     position: "absolute",
@@ -95,13 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255,255,255,0.95)",
   },
-  iosShadow: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-  },
-  androidShadow: {
-    elevation: 3,
-  },
+  iosShadow: {},
+  androidShadow: {},
 });

@@ -24,7 +24,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <LinearGradient
-        colors={["#0a0a0a", "#1a1a2e", "#16213e"]}
+        colors={["#0a0505", "#1a0e0e", "#2b1010"]}
         style={styles.gradient}
       >
         <View style={styles.content}>
@@ -35,7 +35,7 @@ export default function LoginScreen() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.title}>Chichan DJ</Text>
+            <Text style={styles.title}>Chxchx DJ</Text>
             <Text style={styles.subtitle}>Tu música, tu ritmo, tu control</Text>
           </View>
 

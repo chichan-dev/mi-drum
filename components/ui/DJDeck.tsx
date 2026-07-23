@@ -211,7 +211,7 @@ export default function DJDeck({
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: "#0c132b",
+    backgroundColor: "#160b0b",
     borderRadius: 18,
     padding: 14,
     borderWidth: 1.4,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   pillText: {
-    color: "#0f172a",
+    color: "#170d0d",
     fontWeight: "800",
     fontSize: 11,
   },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#3ba3ff",
+    backgroundColor: "#6e0f1f",
   },
   deckBody: {
     flexDirection: "row",

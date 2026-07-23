@@ -123,10 +123,12 @@ const formatTime = (ms: number) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 8,
+    backgroundColor: "#120d0d",
+    borderRadius: 12,
     padding: 8,
     paddingBottom: 4,
+    borderWidth: 1.5,
+    borderColor: "#33181c",
   },
   infoRow: {
     flexDirection: "row",
@@ -139,25 +141,27 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   title: {
-    color: "#fff",
+    color: "#e3e5ec",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "900",
   },
   artist: {
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.6)",
     fontSize: 10,
   },
   time: {
-    color: "rgba(255,255,255,0.85)",
+    color: "#ff2a3b",
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: "900",
   },
   waveformContainer: {
     position: "relative",
     width: "100%",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 4,
+    backgroundColor: "#0f0a0a",
+    borderRadius: 6,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#2c1618",
   },
   barsContainer: {
     flexDirection: "row",
@@ -176,9 +180,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 2,
     zIndex: 10,
-    shadowColor: "#fff",
-    shadowOpacity: 0.8,
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.9,
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 4,
+    shadowRadius: 6,
   },
 });

@@ -1,4 +1,6 @@
+import * as DocumentPicker from "expo-document-picker";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { useFocusEffect } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -85,6 +87,7 @@ export default function DJScreen() {
   const [searchResults, setSearchResults] = useState<ApiTrack[]>([]);
   const [searchQuery, setSearchQuery] = useState("bad bunny");
   const [apiMessage, setApiMessage] = useState<string | null>(null);
+  const [localTracks, setLocalTracks] = useState<DeckTrack[]>(DEMO_TRACKS);
   type LoadingKey = "profile" | "channel" | "playlists" | "liked" | "search";
   const [loading, setLoading] = useState<Record<LoadingKey, boolean>>({
     profile: false,
@@ -95,7 +98,32 @@ export default function DJScreen() {
   });
   const isWide = width > height;
 
-  // Si no está autenticado, mostrar pantalla de login
+  const handlePickLocalAudio = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "audio/*",
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const newTrack: DeckTrack = {
+          id: `local-${Date.now()}`,
+          title: asset.name || "Audio local",
+          artist: "Dispositivo",
+          origin: "local",
+          source: { uri: asset.uri },
+        };
+        setLocalTracks((prev) => [newTrack, ...prev]);
+        setApiMessage(null);
+      }
+    } catch (err) {
+      console.warn("Error seleccionando audio:", err);
+      setApiMessage("No se pudo abrir el explorador de archivos de audio.");
+    }
+  };
+
+  // Permite acceder inmediatamente en modo local/invitado sin necesidad de login obligatorio
   if (authLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -107,20 +135,16 @@ export default function DJScreen() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
-
-  // Responsive sizes
+  // Responsive sizes (platos y consola más compactos)
   const waveformWidth = isWide
-    ? Math.min(width * 0.42, 520)
-    : Math.max(width - 48, 200);
+    ? Math.min(width * 0.35, 360)
+    : Math.max(width - 48, 180);
   const deckSize = isWide
-    ? Math.min(width * 0.28, 320)
-    : Math.min(width * 0.6, 260);
+    ? Math.min(width * 0.18, 160)
+    : Math.min(width * 0.4, 150);
   const sliderHeight = isWide
-    ? Math.min(height * 0.6, 260)
-    : Math.min(height * 0.36, 200);
+    ? Math.min(height * 0.38, 130)
+    : Math.min(height * 0.25, 120);
 
   // Scale helper: reduce sizes on narrow screens (phones)
   const scale = (value: number) => {
@@ -140,21 +164,21 @@ export default function DJScreen() {
     deckB.setCrossGain(rightGain * volumeB);
   }, [deckA, deckB, leftGain, rightGain, volumeA, volumeB]);
 
-  useEffect(() => {
-    // Only force landscape on larger devices (tablets). Small phones keep native orientation.
-    const lockLandscape = width >= 700;
-    if (lockLandscape) {
+  useFocusEffect(
+    React.useCallback(() => {
+      // Forzar siempre modo horizontal (LANDSCAPE) al entrar al modo DJ
       ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.LANDSCAPE
       ).catch(() => undefined);
+
       return () => {
+        // Al salir del modo DJ, volver a portrait para los pads
         ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT
         ).catch(() => undefined);
       };
-    }
-    return () => undefined;
-  }, [width]);
+    }, [])
+  );
 
   const setLoadingFor = (key: LoadingKey, value: boolean) => {
     setLoading((prev) => ({ ...prev, [key]: value }));
@@ -308,13 +332,13 @@ export default function DJScreen() {
       </RNView>
       <RNView style={styles.trackActions}>
         <TouchableOpacity
-          style={[styles.loadButton, { backgroundColor: "#ff8a3c" }]}
+          style={[styles.loadButton, { backgroundColor: "#ff1f3d" }]}
           onPress={() => loadApiTrack(deckA, track, "A")}
         >
           <Text style={styles.loadButtonText}>Deck 1</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.loadButton, { backgroundColor: "#3ba3ff" }]}
+          style={[styles.loadButton, { backgroundColor: "#6e0f1f" }]}
           onPress={() => loadApiTrack(deckB, track, "B")}
         >
           <Text style={styles.loadButtonText}>Deck 2</Text>
@@ -337,30 +361,277 @@ export default function DJScreen() {
           { paddingBottom: insets.bottom + 16, flexGrow: 1 },
         ]}
       >
-        {/* API y búsqueda */}
-        <RNView style={styles.apiCard}>
+        {/* 1. Header con números de deck */}
+        <RNView style={styles.header}>
+          <RNView
+            style={[
+              styles.deckNumber,
+              {
+                backgroundColor: "#ff1f3d",
+                width: scale(30),
+                height: scale(30),
+                borderRadius: scale(15),
+              },
+            ]}
+          >
+            <Text style={[styles.deckNumberText, { fontSize: scale(16) }]}>
+              1
+            </Text>
+          </RNView>
+          <Text style={[styles.mainTitle, { fontSize: scale(18) }]}>
+            Chxchx DJ
+          </Text>
+          <RNView
+            style={[
+              styles.deckNumber,
+              {
+                backgroundColor: "#6e0f1f",
+                width: scale(30),
+                height: scale(30),
+                borderRadius: scale(15),
+              },
+            ]}
+          >
+            <Text style={[styles.deckNumberText, { fontSize: scale(16) }]}>
+              2
+            </Text>
+          </RNView>
+        </RNView>
+
+        {/* 2. Sección de waveforms */}
+        <RNView style={styles.waveformsContainer}>
+          <Waveform
+            width={waveformWidth}
+            height={Math.min(50, Math.max(36, Math.floor(height * 0.09)))}
+            color="#ff1f3d"
+            isPlaying={isPlayingA}
+            position={deckA.status?.positionMillis || 0}
+            duration={deckA.status?.durationMillis || 1}
+            trackTitle={deckA.track?.title}
+            artist={deckA.track?.artist}
+          />
+          <Waveform
+            width={waveformWidth}
+            height={Math.min(50, Math.max(36, Math.floor(height * 0.09)))}
+            color="#6e0f1f"
+            isPlaying={isPlayingB}
+            position={deckB.status?.positionMillis || 0}
+            duration={deckB.status?.durationMillis || 1}
+            trackTitle={deckB.track?.title}
+            artist={deckB.track?.artist}
+          />
+        </RNView>
+
+        {/* 3. Controles superiores */}
+        <RNView style={styles.topControls}>
+          <DJButton
+            label="±6"
+            onPress={() => {}}
+            color="#ff1f3d"
+            size="small"
+          />
+          <DJButton
+            label="SLIP"
+            onPress={() => {}}
+            color="rgba(255,255,255,0.5)"
+            size="small"
+          />
+          <DJButton
+            label="SLIP"
+            onPress={() => {}}
+            color="rgba(255,255,255,0.5)"
+            size="small"
+          />
+          <DJButton
+            label="±6"
+            onPress={() => {}}
+            color="#6e0f1f"
+            size="small"
+          />
+        </RNView>
+
+        {/* 4. Decks principales con controles (Vinilos + Sliders) */}
+        <RNView style={[styles.decksRow, isWide && styles.decksRowWide]}>
+          {/* Control de volumen izquierdo */}
+          <RNView style={styles.volumeControl}>
+            <VerticalSlider
+              value={volumeA}
+              onChange={setVolumeA}
+              height={sliderHeight}
+              color="#ff1f3d"
+            />
+          </RNView>
+
+          {/* Deck A */}
+          <RNView style={styles.deckContainer}>
+            <VinylDeck
+              size={deckSize}
+              accentColor="#ff1f3d"
+              artwork={deckA.track?.artwork}
+              player={deckA}
+              isPlaying={isPlayingA}
+              bpm={124}
+              pitchPercent={-4.2}
+              trackTitle={deckA.track?.title}
+              artist={deckA.track?.artist}
+            />
+            <RNView style={[styles.deckControls, { gap: scale(12) }]}>
+              <CueButton onPress={() => deckA.restart()} color="#FFA500" />
+              <PlayButton
+                onPress={() => deckA.togglePlay()}
+                isPlaying={isPlayingA}
+                color="#4CAF50"
+              />
+            </RNView>
+          </RNView>
+
+          {/* Controles centrales */}
+          <RNView style={styles.centerControls}>
+            <SyncButton onPress={() => {}} />
+            <RNView
+              style={[
+                styles.autoMixButton,
+                {
+                  width: scale(56),
+                  height: scale(56),
+                  borderRadius: scale(28),
+                },
+              ]}
+            >
+              <Text style={[styles.autoMixIcon, { fontSize: scale(18) }]}>
+                ⊕
+              </Text>
+              <Text
+                style={[
+                  styles.autoMixLabel,
+                  { fontSize: Math.max(7, Math.round(scale(7))) },
+                ]}
+              >
+                AUTOMIX
+              </Text>
+            </RNView>
+            <SyncButton onPress={() => {}} />
+          </RNView>
+
+          {/* Deck B */}
+          <RNView style={styles.deckContainer}>
+            <VinylDeck
+              size={deckSize}
+              accentColor="#6e0f1f"
+              artwork={deckB.track?.artwork}
+              player={deckB}
+              isPlaying={isPlayingB}
+              bpm={124}
+              pitchPercent={0}
+              trackTitle={deckB.track?.title}
+              artist={deckB.track?.artist}
+            />
+            <RNView style={[styles.deckControls, { gap: scale(12) }]}>
+              <CueButton onPress={() => deckB.restart()} color="#FFA500" />
+              <PlayButton
+                onPress={() => deckB.togglePlay()}
+                isPlaying={isPlayingB}
+                color="#4CAF50"
+              />
+            </RNView>
+          </RNView>
+
+          {/* Control de volumen derecho */}
+          <RNView style={styles.volumeControl}>
+            <VerticalSlider
+              value={volumeB}
+              onChange={setVolumeB}
+              height={sliderHeight}
+              color="#6e0f1f"
+            />
+          </RNView>
+        </RNView>
+
+        {/* 5. Crossfader */}
+        <RNView style={styles.crossfaderSection}>
+          <Crossfader
+            value={crossfader}
+            onChange={setCrossfader}
+            leftLabel="Deck A"
+            rightLabel="Deck B"
+            leftColor="#ff1f3d"
+            rightColor="#6e0f1f"
+          />
+        </RNView>
+
+        {/* 6. Botones de demo y archivos locales */}
+        <RNView style={styles.demoSection}>
+          <Text style={styles.demoTitle}>Pistas Demos y Archivos del Dispositivo</Text>
+          <TouchableOpacity
+            style={[styles.primaryButton, { marginBottom: 12, backgroundColor: "#34d399" }]}
+            onPress={handlePickLocalAudio}
+          >
+            <Text style={[styles.primaryButtonText, { color: "#000", fontWeight: "700" }]}>
+              📂 Cargar audio del dispositivo
+            </Text>
+          </TouchableOpacity>
+
+          <RNView style={{ gap: 8, width: "100%" }}>
+            {localTracks.map((t) => (
+              <RNView key={t.id} style={styles.trackCard}>
+                <RNView style={[styles.trackThumb, styles.trackThumbPlaceholder]}>
+                  <Text style={styles.trackThumbInitials}>🎵</Text>
+                </RNView>
+                <RNView style={{ flex: 1 }}>
+                  <Text style={styles.trackTitle} numberOfLines={1}>
+                    {t.title}
+                  </Text>
+                  <Text style={styles.trackMeta} numberOfLines={1}>
+                    {t.artist || "Audio local"}
+                  </Text>
+                </RNView>
+                <RNView style={styles.trackActions}>
+                  <TouchableOpacity
+                    style={[styles.loadButton, { backgroundColor: "#ff1f3d" }]}
+                    onPress={() => loadDemoTrack(deckA, t)}
+                  >
+                    <Text style={styles.loadButtonText}>Deck 1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.loadButton, { backgroundColor: "#6e0f1f" }]}
+                    onPress={() => loadDemoTrack(deckB, t)}
+                  >
+                    <Text style={styles.loadButtonText}>Deck 2</Text>
+                  </TouchableOpacity>
+                </RNView>
+              </RNView>
+            ))}
+          </RNView>
+        </RNView>
+
+        {/* 7. Sección de Música, Búsqueda y Perfil (Ubicada abajo) */}
+        <RNView style={[styles.apiCard, { marginTop: 24 }]}>
           <RNView style={styles.userHeader}>
             {user?.picture ? (
               <Image source={{ uri: user.picture }} style={styles.userAvatar} />
             ) : (
               <RNView style={styles.userAvatarPlaceholder}>
                 <Text style={styles.userAvatarInitial}>
-                  {user?.name?.[0] || user?.email?.[0] || "U"}
+                  {user?.name?.[0] || user?.email?.[0] || "🎧"}
                 </Text>
               </RNView>
             )}
             <RNView style={{ flex: 1 }}>
-              <Text style={styles.userName}>{user?.name || "Usuario"}</Text>
-              {user?.email ? (
-                <Text style={styles.userEmail}>{user.email}</Text>
-              ) : null}
+              <Text style={styles.userName}>
+                {user?.name || (isAuthenticated ? "Usuario" : "Modo Local / Demo")}
+              </Text>
+              <Text style={styles.userEmail}>
+                {user?.email || (isAuthenticated ? "" : "Acceso libre sin inicio de sesión")}
+              </Text>
             </RNView>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutButtonText}>Salir</Text>
-            </TouchableOpacity>
+            {isAuthenticated ? (
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+              >
+                <Text style={styles.logoutButtonText}>Salir</Text>
+              </TouchableOpacity>
+            ) : null}
           </RNView>
 
           <Text style={styles.apiCardTitle}>Música y búsqueda</Text>
@@ -512,223 +783,6 @@ export default function DJScreen() {
             </RNView>
           </RNView>
         ) : null}
-
-        {/* Header con números de deck */}
-        <RNView style={styles.header}>
-          <RNView
-            style={[
-              styles.deckNumber,
-              {
-                backgroundColor: "#ff8a3c",
-                width: scale(36),
-                height: scale(36),
-                borderRadius: scale(18),
-              },
-            ]}
-          >
-            <Text style={[styles.deckNumberText, { fontSize: scale(20) }]}>
-              1
-            </Text>
-          </RNView>
-          <Text style={[styles.mainTitle, { fontSize: scale(20) }]}>
-            Chichan DJ
-          </Text>
-          <RNView
-            style={[
-              styles.deckNumber,
-              {
-                backgroundColor: "#3ba3ff",
-                width: scale(36),
-                height: scale(36),
-                borderRadius: scale(18),
-              },
-            ]}
-          >
-            <Text style={[styles.deckNumberText, { fontSize: scale(20) }]}>
-              2
-            </Text>
-          </RNView>
-        </RNView>
-
-        {/* Sección de waveforms */}
-        <RNView style={styles.waveformsContainer}>
-          <Waveform
-            width={waveformWidth}
-            height={Math.min(80, Math.max(56, Math.floor(height * 0.12)))}
-            color="#ff8a3c"
-            isPlaying={isPlayingA}
-            position={deckA.status?.positionMillis || 0}
-            duration={deckA.status?.durationMillis || 1}
-            trackTitle={deckA.track?.title}
-            artist={deckA.track?.artist}
-          />
-          <Waveform
-            width={waveformWidth}
-            height={Math.min(80, Math.max(56, Math.floor(height * 0.12)))}
-            color="#3ba3ff"
-            isPlaying={isPlayingB}
-            position={deckB.status?.positionMillis || 0}
-            duration={deckB.status?.durationMillis || 1}
-            trackTitle={deckB.track?.title}
-            artist={deckB.track?.artist}
-          />
-        </RNView>
-
-        {/* Controles superiores */}
-        <RNView style={styles.topControls}>
-          <DJButton
-            label="±6"
-            onPress={() => {}}
-            color="#ff8a3c"
-            size="small"
-          />
-          <DJButton
-            label="SLIP"
-            onPress={() => {}}
-            color="rgba(255,255,255,0.5)"
-            size="small"
-          />
-          <DJButton
-            label="SLIP"
-            onPress={() => {}}
-            color="rgba(255,255,255,0.5)"
-            size="small"
-          />
-          <DJButton
-            label="±6"
-            onPress={() => {}}
-            color="#3ba3ff"
-            size="small"
-          />
-        </RNView>
-
-        {/* Decks principales con controles */}
-        <RNView style={[styles.decksRow, isWide && styles.decksRowWide]}>
-          {/* Control de volumen izquierdo */}
-          <RNView style={styles.volumeControl}>
-            <VerticalSlider
-              value={volumeA}
-              onChange={setVolumeA}
-              height={sliderHeight}
-              color="#ff8a3c"
-            />
-          </RNView>
-
-          {/* Deck A */}
-          <RNView style={styles.deckContainer}>
-            <VinylDeck
-              size={deckSize}
-              accentColor="#ff8a3c"
-              artwork={deckA.track?.artwork}
-              player={deckA}
-              isPlaying={isPlayingA}
-              bpm={124}
-              pitchPercent={-4.2}
-              trackTitle={deckA.track?.title}
-              artist={deckA.track?.artist}
-            />
-            <RNView style={[styles.deckControls, { gap: scale(16) }]}>
-              <CueButton onPress={() => deckA.restart()} color="#FFA500" />
-              <PlayButton
-                onPress={() => deckA.togglePlay()}
-                isPlaying={isPlayingA}
-                color="#4CAF50"
-              />
-            </RNView>
-          </RNView>
-
-          {/* Controles centrales */}
-          <RNView style={styles.centerControls}>
-            <SyncButton onPress={() => {}} />
-            <RNView
-              style={[
-                styles.autoMixButton,
-                {
-                  width: scale(72),
-                  height: scale(72),
-                  borderRadius: scale(36),
-                },
-              ]}
-            >
-              <Text style={[styles.autoMixIcon, { fontSize: scale(24) }]}>
-                ⊕
-              </Text>
-              <Text
-                style={[
-                  styles.autoMixLabel,
-                  { fontSize: Math.max(8, Math.round(scale(8))) },
-                ]}
-              >
-                AUTOMIX
-              </Text>
-            </RNView>
-            <SyncButton onPress={() => {}} />
-          </RNView>
-
-          {/* Deck B */}
-          <RNView style={styles.deckContainer}>
-            <VinylDeck
-              size={deckSize}
-              accentColor="#3ba3ff"
-              artwork={deckB.track?.artwork}
-              player={deckB}
-              isPlaying={isPlayingB}
-              bpm={124}
-              pitchPercent={0}
-              trackTitle={deckB.track?.title}
-              artist={deckB.track?.artist}
-            />
-            <RNView style={[styles.deckControls, { gap: scale(16) }]}>
-              <CueButton onPress={() => deckB.restart()} color="#FFA500" />
-              <PlayButton
-                onPress={() => deckB.togglePlay()}
-                isPlaying={isPlayingB}
-                color="#4CAF50"
-              />
-            </RNView>
-          </RNView>
-
-          {/* Control de volumen derecho */}
-          <RNView style={styles.volumeControl}>
-            <VerticalSlider
-              value={volumeB}
-              onChange={setVolumeB}
-              height={sliderHeight}
-              color="#3ba3ff"
-            />
-          </RNView>
-        </RNView>
-
-        {/* Crossfader */}
-        <RNView style={styles.crossfaderSection}>
-          <Crossfader
-            value={crossfader}
-            onChange={setCrossfader}
-            leftLabel="Deck A"
-            rightLabel="Deck B"
-            leftColor="#3ba3ff"
-            rightColor="#ff8a3c"
-          />
-        </RNView>
-
-        {/* Botones de demo */}
-        <RNView style={styles.demoSection}>
-          <Text style={styles.demoTitle}>Cargar pistas de demo</Text>
-          <RNView style={styles.demoButtons}>
-            <DJButton
-              label="Demo A → Deck 1"
-              onPress={() => loadDemoTrack(deckA, DEMO_TRACKS[0])}
-              color="#ff8a3c"
-              size="small"
-            />
-            <DJButton
-              label="Demo B → Deck 2"
-              onPress={() => loadDemoTrack(deckB, DEMO_TRACKS[1])}
-              color="#3ba3ff"
-              size="small"
-            />
-          </RNView>
-        </RNView>
       </ScrollView>
     </SafeAreaView>
   );
@@ -737,7 +791,7 @@ export default function DJScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#07080a",
   },
   content: {
     alignItems: "center",
@@ -747,29 +801,33 @@ const styles = StyleSheet.create({
   apiCard: {
     width: "100%",
     maxWidth: 980,
-    backgroundColor: "#121212",
-    borderColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1,
+    backgroundColor: "#120d0d",
+    borderColor: "#33181c",
+    borderWidth: 1.5,
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
     gap: 10,
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
   },
   apiCardTitle: {
-    color: "#fff",
-    fontWeight: "800",
+    color: "#e3e5ec",
+    fontWeight: "900",
     fontSize: 16,
-    letterSpacing: 0.3,
+    letterSpacing: 1,
   },
   apiCardSubtitle: {
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.6)",
     fontSize: 12,
   },
   apiError: {
-    backgroundColor: "rgba(255,87,51,0.15)",
-    borderColor: "rgba(255,87,51,0.6)",
+    backgroundColor: "rgba(255,42,59,0.15)",
+    borderColor: "#ff2a3b",
     borderWidth: 1,
-    color: "#ffb29e",
+    color: "#ff808c",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
@@ -780,29 +838,38 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   primaryButton: {
-    backgroundColor: "#34d399",
+    backgroundColor: "#d91625",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ff4d5a",
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 6,
+    elevation: 4,
   },
   primaryButtonText: {
-    color: "#0a0a0a",
-    fontWeight: "800",
-    letterSpacing: 0.3,
+    color: "#ffffff",
+    fontWeight: "900",
+    letterSpacing: 1,
   },
   secondaryButton: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#1a1112",
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#4a2126",
   },
   secondaryButtonText: {
-    color: "#fff",
-    fontWeight: "700",
-    letterSpacing: 0.2,
+    color: "#e3e5ec",
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
   profileRow: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#170f0f",
     padding: 10,
     borderRadius: 10,
     gap: 4,
@@ -826,11 +893,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   infoItem: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#170f0f",
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
     minWidth: 110,
+    borderWidth: 1,
+    borderColor: "#33181c",
   },
   infoLabel: {
     color: "rgba(255,255,255,0.6)",
@@ -847,11 +916,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   playlistPill: {
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "#170f0f",
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
     minWidth: 140,
+    borderWidth: 1,
+    borderColor: "#33181c",
   },
   playlistTitle: {
     color: "#fff",
@@ -864,7 +935,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#33181c",
   },
   searchRow: {
     flexDirection: "row",
@@ -873,13 +944,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#0f0a0a",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: "#fff",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "#4a2126",
   },
   listSection: {
     width: "100%",
@@ -888,31 +959,34 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   listTitle: {
-    color: "#fff",
-    fontWeight: "800",
+    color: "#e3e5ec",
+    fontWeight: "900",
     fontSize: 15,
+    letterSpacing: 0.8,
   },
   trackCard: {
     flexDirection: "row",
     gap: 10,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#121319",
     borderRadius: 12,
     padding: 10,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#341a1c",
   },
   trackThumb: {
     width: 62,
     height: 62,
     borderRadius: 10,
-    backgroundColor: "#1f1f1f",
+    backgroundColor: "#1c1213",
   },
   trackThumbPlaceholder: {
     alignItems: "center",
     justifyContent: "center",
   },
   trackThumbInitials: {
-    color: "#fff",
-    fontWeight: "800",
+    color: "#ff2a3b",
+    fontWeight: "900",
     fontSize: 18,
   },
   trackTitle: {
@@ -936,9 +1010,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   loadButtonText: {
-    color: "#0a0a0a",
-    fontWeight: "800",
-    letterSpacing: 0.3,
+    color: "#ffffff",
+    fontWeight: "900",
+    letterSpacing: 0.5,
   },
   header: {
     flexDirection: "row",
@@ -953,10 +1027,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.8,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 6,
+    elevation: 6,
   },
   deckNumberText: {
     fontSize: 20,
@@ -964,10 +1039,14 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   mainTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: 2,
+    fontSize: 22,
+    fontWeight: "900",
+    color: "#e3e5ec",
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    textShadowColor: "rgba(255, 42, 59, 0.6)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   waveformsContainer: {
     flexDirection: "row",
@@ -1014,21 +1093,28 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "#171010",
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "#ff2a3b80",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 8,
+    elevation: 6,
   },
   autoMixIcon: {
-    fontSize: 24,
-    color: "rgba(255,255,255,0.7)",
+    fontSize: 22,
+    color: "#ff2a3b",
+    fontWeight: "900",
   },
   autoMixLabel: {
     fontSize: 8,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.5)",
+    fontWeight: "900",
+    color: "#ff2a3b",
     marginTop: 2,
+    letterSpacing: 1,
   },
   crossfaderSection: {
     width: "100%",
@@ -1041,12 +1127,18 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     alignItems: "center",
     gap: 8,
+    backgroundColor: "#120d0d",
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#33181c",
   },
   demoTitle: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 13,
-    fontWeight: "600",
-    marginBottom: 4,
+    color: "#e3e5ec",
+    fontSize: 14,
+    fontWeight: "900",
+    marginBottom: 6,
+    letterSpacing: 0.8,
   },
   demoButtons: {
     flexDirection: "row",
@@ -1059,19 +1151,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
+    backgroundColor: "#07080a",
   },
   loadingText: {
-    color: "rgba(255,255,255,0.7)",
+    color: "#ff2a3b",
     fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
   userHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#170f0f",
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#33181c",
   },
   userAvatar: {
     width: 48,
@@ -1082,36 +1179,39 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#34d399",
+    backgroundColor: "#cc1422",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#ff4d5a",
   },
   userAvatarInitial: {
-    color: "#0a0a0a",
+    color: "#ffffff",
     fontSize: 20,
     fontWeight: "900",
   },
   userName: {
-    color: "#fff",
+    color: "#ffffff",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "900",
+    letterSpacing: 0.5,
   },
   userEmail: {
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.65)",
     fontSize: 13,
     marginTop: 2,
   },
   logoutButton: {
-    backgroundColor: "rgba(255,87,51,0.2)",
+    backgroundColor: "#2a1215",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,87,51,0.6)",
+    borderColor: "#ff2a3b",
   },
   logoutButtonText: {
-    color: "#ffb29e",
-    fontWeight: "700",
+    color: "#ff808c",
+    fontWeight: "800",
     fontSize: 13,
   },
 });

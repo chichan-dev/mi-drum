@@ -1,8 +1,8 @@
-# 🥁 Chichan DJ & Drum App (Expo)
+# 🥁 Chxchx DJ & Drum App (Expo)
 
 ¡Bienvenido! Esta app combina **Drum Pads** con una **consola DJ completa** construida con **React Native + Expo**. Incluye autenticación OAuth con Google, integración con YouTube Music, y control de decks de DJ profesional.
 
-> **Marca**: parte del ecosistema **chichan‑dev** · Repos/paquetes bajo el paraguas de *chichan‑labs*.
+> **Marca**: parte del ecosistema **chxchx‑dev** · Repos/paquetes bajo el paraguas de *chxchx‑labs*.
 
 ---
 
@@ -296,13 +296,13 @@ Agrega en `package.json` según tu gestor:
 
 ## 📜 Licencia
 
-MIT © chichan‑dev. Consulta el archivo `LICENSE`.
+MIT © chxchx‑dev. Consulta el archivo `LICENSE`.
 
 ---
 
 ## 🧾 Créditos
 
-* **chichan‑dev** — desarrollo y mantenimiento.
+* **chxchx‑dev** — desarrollo y mantenimiento.
 * Samples de prueba: usa material libre de royalties o propio. Atribuye si empleas librerías/catálogos de terceros.
 
 ---
@@ -312,7 +312,7 @@ MIT © chichan‑dev. Consulta el archivo `LICENSE`.
 Si reutilizas esta base en otros repos, siéntete libre de mantener el sello:
 
 ```
-Made with ❤️ by chichan‑dev  |  chichan‑labs
+Made with ❤️ by chxchx‑dev  |  chxchx‑labs
 ```
 
 ---

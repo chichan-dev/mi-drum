@@ -18,14 +18,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#07080a',
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '900',
+    color: '#e3e5ec',
+    letterSpacing: 1.5,
   },
   separator: {
     marginVertical: 30,
     height: 1,
     width: '80%',
+    backgroundColor: '#33181c',
   },
 });

@@ -1,10 +1,10 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DeckIcon, GridIcon, SettingsIcon } from "@/components/icons";
 import Colors from "@/constants/Colors";
-import { useClientOnlyValue } from "@/hooks/useClientOnlyValue";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 function TabBarIcon(props: {
@@ -16,12 +16,23 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const barHeight = 60 + insets.bottom;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: useClientOnlyValue(false, true),
+        tabBarActiveTintColor: "#ff2a3b",
+        tabBarInactiveTintColor: "#6b4f4f",
+        tabBarStyle: {
+          backgroundColor: "#0c0908",
+          borderTopColor: "#33181c",
+          borderTopWidth: 1.5,
+          height: barHeight,
+          paddingBottom: 6 + insets.bottom,
+          paddingTop: 6,
+        },
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -43,6 +54,7 @@ export default function TabLayout() {
         name="DJ"
         options={{
           title: "DJ",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <DeckIcon
               width={size}

@@ -134,13 +134,16 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 5,
+    backgroundColor: "#07080a",
+    paddingHorizontal: 8,
   },
   title: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "900",
     textAlign: "center",
     marginBottom: 12,
+    color: "#e3e5ec",
+    letterSpacing: 1.5,
   },
   grid: {
     flex: 1,
@@ -150,7 +153,6 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   pad: {
-    // pad sizing is now controlled dynamically from the parent (width/height passed inline)
     margin: 6,
   },
   columnWrapper: {
@@ -165,23 +167,33 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   loadingText: {
-    backgroundColor: "rgba(0,0,0,0.6)",
-    color: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    backgroundColor: "#120d0d",
+    borderColor: "#ff2a3b",
+    borderWidth: 1,
+    color: "#ff2a3b",
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
     overflow: "hidden",
+    shadowColor: "#ff2a3b",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 6,
   },
   loadingBarContainer: {
     height: 8,
     width: "80%",
-    backgroundColor: "rgba(0,0,0,0.12)",
+    backgroundColor: "#170f0f",
+    borderColor: "#33181c",
+    borderWidth: 1,
     borderRadius: 6,
     marginTop: 8,
     overflow: "hidden",
   },
   loadingBar: {
     height: "100%",
-    backgroundColor: "#4d96ff",
+    backgroundColor: "#ff2a3b",
   },
 });

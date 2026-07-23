@@ -42,7 +42,6 @@ export default function SpinningDisc({
       );
       loop.start();
     } else {
-      loop?.stop();
       rotation.stopAnimation();
     }
 
@@ -103,7 +102,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#0f172a",
+    backgroundColor: "#170d0d",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.6)",
   },

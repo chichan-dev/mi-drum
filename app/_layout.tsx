@@ -5,9 +5,11 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -45,13 +47,32 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const CustomDarkTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: "#07080a",
+    card: "#0c0908",
+    text: "#e3e5ec",
+    border: "#33181c",
+  },
+};
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    // Modo inmersivo "sticky": oculta volver/home/recientes; un swipe desde
+    // el borde los muestra momentáneamente y luego se ocultan solos de nuevo.
+    NavigationBar.setBehaviorAsync("overlay-swipe").catch(() => undefined);
+    NavigationBar.setVisibilityAsync("hidden").catch(() => undefined);
+  }, []);
+
   return (
-    <SafeAreaProvider style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#07080a" }}>
+      <ThemeProvider value={CustomDarkTheme}>
+        <Stack screenOptions={{ contentStyle: { backgroundColor: "#07080a" } }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         </Stack>
