@@ -1,5 +1,7 @@
 # DarkBass
 
+**[English](README.md) · [Español](README.es.md)**
+
 DarkBass is a personal music experimentation project for practicing drums, exploring DJ tools, and controlling Spotify playback from a mobile app.
 
 The app combines local drum pads, a DJ console, audio decks, and Spotify OAuth integration. Spotify features are handled through a local API that can search tracks and control an active Spotify device.
