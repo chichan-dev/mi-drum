@@ -2,8 +2,6 @@
 
 # dependencies
 node_modules/
-package-lock.json
-
 
 # Expo
 .expo/
@@ -40,5 +38,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders
-/ios
-/android
+apps/mobile/ios
+apps/mobile/android
+
+# apps/api
+apps/api/data.sqlite*

@@ -1,339 +1,264 @@
-# 🥁 Chxchx DJ & Drum App (Expo)
+# DarkBass
 
-¡Bienvenido! Esta app combina **Drum Pads** con una **consola DJ completa** construida con **React Native + Expo**. Incluye autenticación OAuth con Google, integración con YouTube Music, y control de decks de DJ profesional.
+DarkBass is a personal music experimentation project for practicing drums, exploring DJ tools, and controlling Spotify playback from a mobile app.
 
-> **Marca**: parte del ecosistema **chxchx‑dev** · Repos/paquetes bajo el paraguas de *chxchx‑labs*.
+The app combines local drum pads, a DJ console, audio decks, and Spotify OAuth integration. Spotify features are handled through a local API that can search tracks and control an active Spotify device.
 
----
+## Current status
 
-## ✨ Características
+- Native mobile app built with Expo SDK 54 and React Native.
+- Android wireless debugging supported through ADB.
+- DarkBass Metro server runs on port `8082`.
+- Local API runs on port `2700`.
+- Spotify OAuth configured for personal development.
+- Jamendo remains optional and is not currently configured.
 
-### Drum Pads
-* Pads táctiles con baja latencia (según dispositivo)
-* Carga de **samples** locales desde `assets/`
-* Mapeo de pads configurable (nombre, color, sonido, volumen, **pitch/gain**)
-* Indicador visual al presionar
-* Modo **Hold** / **One‑Shot**
+## Requirements
 
-### DJ Console
-* 🎚️ **Doble deck de vinilo** con controles táctiles
-* 🎵 **Waveforms** visuales en tiempo real
-* 🔀 **Crossfader** suave entre decks
-* 🎛️ **Controles verticales** de volumen por deck
-* ▶️ **Play, Cue, Sync** buttons profesionales
-* 🔍 **Búsqueda de música** en YouTube
-* 📱 **Integración con YouTube**: canal, playlists, me gusta
-* 🔐 **Autenticación OAuth con Google**
-* 💾 **Persistencia segura** de sesión con Zustand + SecureStore
+- Node.js 20.x for the API.
+- npm.
+- Xcode and an iPhone simulator for iOS.
+- Android Studio, Android SDK, and JDK 21 for Android.
+- An Android phone on the same Wi-Fi network when using wireless debugging.
 
-### Sistema de Autenticación
-* Login con cuenta de Google
-* Token JWT para todas las peticiones
-* Almacenamiento encriptado del token
-* Persistencia de sesión entre reinicios
-* **[Ver documentación completa](AUTH_README.md)**
+The API uses `better-sqlite3`, a native module. If the Node.js version changes, rebuild it:
 
----
+```bash
+npm rebuild better-sqlite3
+```
 
-## 🚀 Inicio Rápido
+## Installation
 
-### 1. Instalación
+From the repository root:
+
 ```bash
 npm install
-# o
-npx expo install
 ```
 
-### 2. Configurar Backend (para funciones DJ)
-Sigue la guía en **[AUTH_README.md](AUTH_README.md)** para:
-- Configurar Google OAuth
-- Iniciar el backend de ejemplo
-- Obtener tus credenciales de API
+Main project structure:
 
-### 3. Iniciar la App
-```bash
-# Con variables de entorno para conectar al backend
-EXPO_PUBLIC_API_BASE_URL="http://192.168.80.26:2600" \
-EXPO_PUBLIC_AUTH_URL="http://192.168.80.26:2600/auth/google" \
-expo start
+```text
+darkbass/
+├── apps/
+│   ├── mobile/   # Expo/React Native app
+│   └── api/      # Local API and Spotify OAuth
+├── package.json
+└── README.md
 ```
 
----
+## Run the mobile app
 
-## 📂 Estructura del Proyecto
-
-```
-app/
-  (tabs)/
-    index.tsx           # Pantalla de Drum Pads
-    DJ.tsx              # Consola DJ con autenticación
-    Settings.tsx        # Configuración
-store/
-  useAuthStore.ts       # State management de autenticación
-  useDrumStore.ts       # State de drum pads
-hooks/
-  useGoogleAuth.ts      # Hook de OAuth con Google
-  useDeckPlayer.ts      # Control de decks de DJ
-  useAudio.ts           # Audio engine
-components/ui/
-  LoginScreen.tsx       # Pantalla de login
-  VinylDeck.tsx         # Deck de vinilo visual
-  Crossfader.tsx        # Crossfader entre decks
-  Waveform.tsx          # Visualización de waveform
-  VerticalSlider.tsx    # Control de volumen vertical
-services/
-  api.ts                # Cliente HTTP con autenticación
-  audio.ts              # Motor de audio
-```
-
----
-
-## 🔐 Autenticación
-
-El sistema de autenticación permite:
-- Login con Google OAuth
-- Acceso a tu canal de YouTube, playlists y me gusta
-- Búsqueda de música
-- Token JWT persistente y seguro
-
-**Documentación completa:**
-- **[AUTH_README.md](AUTH_README.md)** - Guía rápida
-- **[OAUTH_SETUP.md](OAUTH_SETUP.md)** - Setup detallado del backend
-- **[backend-example.js](backend-example.js)** - Código de servidor completo
-
----
-
-## 🧱 Stack
-
-* **React Native** + **Expo** (SDK 51+ recomendado).
-* **expo-av** (reproducción de audio) u otra lib similar.
-* **TypeScript** opcional.
-
----
-
-## 📦 Requisitos previos
-
-* **Node.js** LTS (18/20).
-* Gestor de paquetes: `npm`, `yarn` o `pnpm`.
-* **Expo Go** en tu teléfono *(Android/iOS)* o **Android Studio** / **Xcode** si usarás emuladores.
-* Cuenta Expo (opcional, para builds/OTA).
-
----
-
-## 🚀 Cómo correr el proyecto (Expo)
+DarkBass is configured to use port `8082` because another project may be using `8081`.
 
 ```bash
-# 1) Instalar dependencias
-npm install          # o: yarn | pnpm i
-
-# 2) Iniciar el servidor de desarrollo
-npx expo start -c    # limpia la caché por si acaso
-
-# 3a) Abrir en dispositivo físico con Expo Go
-#    - Escanea el QR que muestra la terminal o la web de Expo
-
-# 3b) Abrir en emulador
-#    - Android: presiona "a" en la terminal (necesitas Android Studio en ejecución)
-#    - iOS: presiona "i" (solo macOS con Xcode)
+npm run mobile
 ```
 
-**Comandos útiles**
+Metro starts at:
+
+```text
+http://localhost:8082
+```
+
+To start Expo for a specific platform:
 
 ```bash
-npm run android   # lanza en emulador/dispositivo Android
-npm run ios       # lanza en simulador iOS (macOS)
-npm run web       # modo web (experimental según componentes)
+npm run mobile:android
+npm run mobile:ios
 ```
 
----
+## Native Android
 
-## 🗂️ Estructura sugerida
+The native build uses the JDK 21 bundled with Android Studio. To build, install, and open DarkBass on the connected phone:
 
-```
-mi-drum/
-├─ app/                     # rutas Expo Router (si se usa)
-├─ src/
-│  ├─ components/
-│  │  ├─ Pad.tsx
-│  │  └─ PadGrid.tsx
-│  ├─ hooks/
-│  │  └─ useSound.ts        # hook para cargar/reproducir
-│  ├─ config/
-│  │  └─ pads.ts            # mapeo de pads (id, label, color, sample)
-│  └─ screens/
-│     └─ HomeScreen.tsx
-├─ assets/
-│  └─ samples/              # aquí van los .wav / .mp3
-├─ package.json
-└─ README.md
+```bash
+npm run mobile:native:android
 ```
 
----
+The phone must appear as a `device`:
 
-## 🎛️ Configurar pads
-
-Define tu banco en `src/config/pads.ts`:
-
-```ts
-// src/config/pads.ts
-export type Pad = {
-  id: string;
-  label: string;
-  color?: string;
-  file: any;      // require('...') o Asset
-  volume?: number; // 0..1
-};
-
-export const PADS: Pad[] = [
-  { id: 'kick', label: 'KICK', color: '#D64550', file: require('../../assets/samples/kick.wav'), volume: 0.9 },
-  { id: 'snare', label: 'SNARE', color: '#84DD8A', file: require('../../assets/samples/snare.wav') },
-  { id: 'hat', label: 'HAT', color: '#FFD166', file: require('../../assets/samples/hihat.wav') },
-  // ...
-];
+```bash
+adb devices -l
 ```
 
-En tu `Pad.tsx` usa `expo-av` para reproducir el audio del `file` del pad. Controla `volume`, `rate` (pitch) y `shouldPlay` según el modo.
+### Wireless debugging
 
----
+1. Enable **Developer options** and **Wireless debugging** on Android.
+2. Select **Pair device with pairing code**.
+3. Discover the available services:
 
-## 🔊 Paquete de sonidos de prueba (15 samples)
-
-Coloca tus audios en `assets/samples/` y actualiza `pads.ts`. Sugerencia de nombres:
-
-```
-assets/samples/
-├─ kick.wav
-├─ snare.wav
-├─ hihat.wav
-├─ clap.wav
-├─ rim.wav
-├─ tom_low.wav
-├─ tom_mid.wav
-├─ tom_high.wav
-├─ crash.wav
-├─ ride.wav
-├─ perc1.wav
-├─ perc2.wav
-├─ fx_sweep.wav
-├─ fx_riser.wav
-└─ shaker.wav
+```bash
+adb mdns services
 ```
 
-> Tip: archivos **.wav** cortos suelen dar mejor respuesta que .mp3.
+4. Pair using the pairing address and code shown on the phone:
 
----
+```bash
+adb pair IP:PAIRING_PORT CODE
+```
 
-## 🧠 Audio Engine
+5. Connect using the `_adb-tls-connect._tcp` port:
 
-* **expo-av**: sencillo y soportado en Expo sin eject. Ideal para empezar.
-* **react-native-track-player** o **react-native-sound**: más control, pero puede requerir configuración nativa.
-* **WebAudio (Expo Web)**: solo para web.
+```bash
+adb connect IP:CONNECTION_PORT
+adb devices -l
+```
 
-Empieza con `expo-av` y evalúa latencia. Optimiza con:
+The computer and phone must be on the same Wi-Fi network. If the computer's IP changes, update the local development URLs as well.
 
-* Samples cortos (mono, 44.1 kHz, 16‑bit).
-* Pre‑carga de sonidos (loadAsync) en la pantalla inicial.
-* Evitar crear/destroy `Sound` en cada tap; reutiliza instancias si es viable.
+## Local API
 
----
+The API lives in `apps/api` and handles OAuth, token storage, and authenticated Spotify requests.
 
-## 🧪 Testing rápido
+### Environment variables
 
-* Prueba la presión repetida en diferentes pads para chequear solapamiento.
-* Mide latencia subjetiva en Android vs iOS.
-* Verifica volúmenes balanceados y normaliza si es necesario.
+Create `apps/api/.env` with local values:
 
----
+```env
+PORT=2700
+PUBLIC_URL=http://YOUR_MAC_IP:2700
+JWT_SECRET=use-a-long-local-secret
+SPOTIFY_CLIENT_ID=your-client-id
+SPOTIFY_CLIENT_SECRET=your-client-secret
+SPOTIFY_REDIRECT_URI=http://YOUR_MAC_IP:2700/auth/spotify/callback
+```
 
-## 🛠️ Scripts (ejemplos)
+Never put the Client Secret in the mobile app, commit it to the repository, or share it publicly.
 
-Agrega en `package.json` según tu gestor:
+### Create and configure the Spotify app
+
+1. Open the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Create a personal app named **DarkBass**.
+3. Use a short description stating that it is a personal, non-commercial project.
+4. Add the same Redirect URI used in `SPOTIFY_REDIRECT_URI`. The current development setup uses:
+
+```text
+http://192.168.40.144:2700/auth/spotify/callback
+```
+
+The URI must match exactly, including the protocol, IP address, port, and path.
+
+### Start the API
+
+```bash
+npm run api
+```
+
+The API is available at:
+
+```text
+http://192.168.40.144:2700
+```
+
+Check its status with:
+
+```bash
+curl http://localhost:2700/health
+```
+
+A healthy response looks like this:
 
 ```json
-{
-  "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
-    "clean": "rimraf node_modules .expo .expo-shared && npm i"
-  }
-}
+{"ok":true,"spotify":true,"jamendo":false}
 ```
 
-> Ajusta `run:android/ios` si estás usando *managed workflow* con EAS o si prefieres solo `expo start`.
+If you see `EADDRINUSE` on port `2700`, the API is already running. Do not start a second instance. Check it with:
 
----
-
-## 🧩 Personalización rápida
-
-* **Colores** de pads: en `pads.ts` (`color`).
-* **Etiquetas**: `label`.
-* **Tamaño/espaciado**: en `PadGrid.tsx` (usar `Dimensions` y `aspectRatio`).
-* **Feedback visual**: animación con `Pressable` + `Animated`.
-
----
-
-## 🗺️ Roadmap
-
-* [ ] Grabación y export de loops.
-* [ ] Quantize / metrónomo.
-* [ ] Bancos múltiples y selector.
-* [ ] Import de samples del dispositivo.
-* [ ] Secuenciador simple de 16 pasos.
-
----
-
-## 🤝 Contribuciones
-
-¡Se aceptan PRs! Abre un *issue* con la mejora/bug y describe:
-
-1. Contexto, 2) Pasos para reproducir, 3) Propuesta, 4) Capturas si aplica.
-
-**Estilo**: sigue el linter/prettier del repo. Convenciones de *commit* sugeridas: *feat/fix/chore/docs/refactor/test*.
-
----
-
-## 📜 Licencia
-
-MIT © chxchx‑dev. Consulta el archivo `LICENSE`.
-
----
-
-## 🧾 Créditos
-
-* **chxchx‑dev** — desarrollo y mantenimiento.
-* Samples de prueba: usa material libre de royalties o propio. Atribuye si empleas librerías/catálogos de terceros.
-
----
-
-## 🧩 Branding
-
-Si reutilizas esta base en otros repos, siéntete libre de mantener el sello:
-
-```
-Made with ❤️ by chxchx‑dev  |  chxchx‑labs
+```bash
+lsof -nP -iTCP:2700 -sTCP:LISTEN
 ```
 
----
+## Connect the mobile app to the API
 
-## 📸 Screenshots (opcional)
+The mobile app uses the local file `apps/mobile/.env.local`, which must not be committed:
 
-Coloca imágenes en `assets/screens/` y enlázalas aquí:
+```env
+EXPO_PUBLIC_SPOTIFY_API_URL=http://YOUR_MAC_IP:2700
+```
 
-![Home](assets/screens/home.png)
-![Pad Grid](assets/screens/pads.png)
+After changing it, restart Metro on the configured port:
 
----
+```bash
+npm run mobile
+```
 
-## ❓ FAQ
+For the current phone and network, the URL is:
 
-**¿No suena nada en iOS?** Verifica el *mute switch* y permisos de audio si usas motores alternativos.
+```text
+http://192.168.40.144:2700
+```
 
-**¿Se oye con retraso en Android?** Prueba con `.wav` cortos, precarga sonidos y cierra apps en segundo plano.
+## Features
 
-**¿Puedo usar teclado físico?** Sí, mapea eventos en una pantalla web o con libs que expongan key events.
+### Drum pads
 
----
+- 15 drum pads with local `.wav` sounds.
+- Progressive sound loading during startup.
+- Touch response for rhythm practice.
 
-> ¿Necesitas que deje pre‑configurado un **banco de 15 sonidos** y el `hook` de audio? Pídemelo y lo agrego al repo base.
+### DJ mode
+
+- Local audio decks.
+- Vinyl and playback controls.
+- Crossfader and volume controls.
+- Navigation between Pads, DJ, and Settings.
+
+### Spotify
+
+- OAuth sign-in.
+- Connected profile information.
+- Track search.
+- Device and playback state lookup.
+- Play, pause, previous, next, seek, and volume controls.
+
+Remote playback control requires a Spotify Premium account and an active Spotify device. DarkBass does not mix Spotify audio with the local decks.
+
+## Spotify API
+
+Public authentication routes:
+
+```text
+GET /auth/spotify/login?redirect_uri=...
+GET /auth/spotify/callback
+```
+
+Authenticated routes:
+
+```text
+GET  /spotify/me
+GET  /spotify/search?q=...
+GET  /spotify/devices
+GET  /spotify/player/state
+PUT  /spotify/player/play
+PUT  /spotify/player/pause
+POST /spotify/player/next
+POST /spotify/player/previous
+PUT  /spotify/player/seek?position_ms=...
+PUT  /spotify/player/volume?volume_percent=...
+```
+
+## Main scripts
+
+```bash
+npm run mobile                  # Metro on port 8082
+npm run mobile:android          # Expo Android on port 8082
+npm run mobile:ios              # Expo iOS on port 8082
+npm run mobile:native:android   # Build and install Android
+npm run mobile:native:ios       # Build and install iOS
+npm run mobile:native:prebuild  # Regenerate native folders
+npm run api                     # API in development mode
+npm run api:build               # Build the TypeScript API
+```
+
+## Development notes
+
+- Do not use port `8081` for DarkBass when another project is using it.
+- Keep the API and Metro running in separate terminals.
+- If Node.js changes, run `npm rebuild better-sqlite3`.
+- Do not start a second API on port `2700`.
+- Never commit `.env`, `.env.local`, tokens, or Client Secrets.
+- Android and iOS native folders can be regenerated with Expo.
+
+## License
+
+Personal music experimentation project. Credentials, tokens, and private development configuration belong to their owner.
