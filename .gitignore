@@ -32,10 +32,14 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
 
 # generated native folders
-/ios
-/android
+apps/mobile/ios
+apps/mobile/android
+
+# apps/api
+apps/api/data.sqlite*
